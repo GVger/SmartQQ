@@ -18,6 +18,7 @@ public class Login {
 	private String psessionId = null;
 	
 	private String QQNum = null;
+	private String face = null;
 	
 	private String qrcodeCallBackUrl = null;
 	private String strQrsig = null;
@@ -36,6 +37,9 @@ public class Login {
 		this.vfwebqq = getvfwebqq();
 		this.hash2 = HttpConnect.hash2(QQNum);
 		this.psessionId = getPsessionid();
+		log();
+		this.face = getSelfFace();
+		
 	}
 	
 	//初始的cookie
@@ -195,19 +199,34 @@ public class Login {
 		return HttpConnect.getResponsePost(strUrl, cookie3+cookie4, referer, param);
 	}
 	
+	//获取登录QQ的face值
+	private String getSelfFace(){
+		String strUrl = "http://s.web2.qq.com/api/get_self_info2";
+		String referer = "http://s.web2.qq.com/proxy.html";
+		
+		String tmp = HttpConnect.getResponse(strUrl, cookie3+ cookie4, referer);
+		tmp = tmp.substring(tmp.indexOf("face")+6);
+		tmp = tmp.substring(0, tmp.indexOf(","));
+		
+		return tmp;
+	}
+	
+	private void log(){
+		String strUrl = "http://d1.web2.qq.com";
+		String referer = "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2";
+		HttpConnect.getCookies(strUrl, null, referer);
+	}
+	
 	public static void main(String[] args) throws InterruptedException {
 		System.out.println("生成的二维码在E盘下:test.png");
 		Login login = new Login("E:/test.png");
 		String friend = login.getFriendList();
-		System.out.println(friend);
 		String uin = JSONUtil.getKey(JSONUtil.getFriendList(friend), "本仙人");
-		String face = JSONUtil.getFaceByUin(uin, friend);
-		System.out.println(face);
-		System.out.println(uin);
-		for(int i = 0; i < 1; i++){
-			System.out.println(HttpConnect.sendFriendMsg("isok?", 
+		System.out.println(login.face);
+		for(int i = 0; i < 4; i++){
+			System.out.println(HttpConnect.sendFriendMsg("QQ信息轰炸:"+i, 
 					uin,
-					"669",
+					login.face,
 					login.cookie3+login.cookie4, 
 					login.psessionId));
 		}
