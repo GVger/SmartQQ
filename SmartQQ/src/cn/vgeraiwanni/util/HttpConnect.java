@@ -1,6 +1,5 @@
 package cn.vgeraiwanni.util;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -31,7 +29,9 @@ public class HttpConnect {
 		try {
 			URL url = new URL(strUrl);
 			URLConnection connection = url.openConnection();
-			connection.setRequestProperty("referer", referer);
+			if(referer != null){
+				connection.setRequestProperty("referer", referer);
+			}
 			connection.connect();
 			byte[] buffer = getBuffer(connection.getInputStream());
 			fileWrite(saveFilePath, buffer);
@@ -256,5 +256,24 @@ public class HttpConnect {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	//暂时有点问题
+	public static String sendFriendMsg(String content, String uin, String face, String cookie34, String psessionid){
+		String strUrl = "http://d1.web2.qq.com/channel/send_buddy_msg2";
+//		String referer = "http://d1.web2.qq.com/cfproxy.html?v=&callback=1";
+		String referer = "http://d1.web2.qq.com/cfproxy.html";
+		
+		String param = "r={"
+				+ "\"to\":"+ uin+","//uin
+				+ "\"content\":\"[\\\""+ content+"\\\","
+				+ "[\\\"font\\\",{\\\"name\\\":\\\"宋体\\\",\\\"size\\\":10,\\\"style\\\":[0,0,0],\\\"color\\\":\\\"000000\\\"}]]\","
+				+ "\"face\":"+ face+","//现在主要的点 TODO
+				+ "\"clientid\":53999199,"//clientid不变
+				+ "\"msg_id\":"+ Math.round(Math.random())*65535+","//这个测试看变不变
+				+ "\"psessionid\":\""+ psessionid+"\""
+				+ "}";
+		
+		return getResponsePost(strUrl, cookie34, referer, param);
 	}
 }
